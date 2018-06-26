@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Weather App</title>
+  <title>Bootstrap Example</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -269,7 +269,7 @@ app.controller('weather-control', function($scope, $http) {
     $scope.clouds=$scope.myData.clouds.all;
     $scope.description=$scope.myData.weather[0].description;
     $scope.imageUrl=$scope.myData.weather[0].icon;
-    $scope.imageUrl="http://openweathermap.org/img/w/"+$scope.imageUrl+".png";
+    $scope.imageUrl="https://openweathermap.org/img/w/"+$scope.imageUrl+".png";
   });
   $scope.locationWeather=function(location){
     console.log(location);
@@ -286,6 +286,8 @@ app.controller('weather-control', function($scope, $http) {
       $scope.clouds=$scope.myData.clouds.all;
       $scope.description=$scope.myData.weather[0].description;
       $scope.location=$scope.myData.name+" , "+$scope.myData.sys.country;
+      $scope.imageUrl=$scope.myData.weather[0].icon;
+      $scope.imageUrl="https://openweathermap.org/img/w/"+$scope.imageUrl+".png";
     });
 
   }
