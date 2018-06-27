@@ -61,6 +61,13 @@
     text-align:center;
     font-weight:700;
     background-color: #EEEEEE;
+    font-size:15px;
+  }
+  .weather-header div img{
+    height:15px;
+  }
+  .row{
+    margin:0px;
   }
   .weather-header div span{
     font-weight:200;
@@ -193,7 +200,7 @@
 	padding: 0;
 	position: relative;
 	text-shadow: 0 -1px 0 #000;
-	width: 80px;
+	width: 60px;
 }
 
 .webdesigntuts-workshop button:hover,
@@ -221,6 +228,14 @@
 		box-shadow: 0 0 20px rgba(0,255,0,.6), inset 0 0 10px rgba(0,255,0,.4), 0 2px 0 #000;
     }
 }
+.spinner{
+  height:75vh;
+  background:url("spin.gif");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
+  z-index: 10000;
+}
 </style>
 <body>
 
@@ -244,30 +259,37 @@
 <div ng-app="my-app" ng-controller="weather-control">
   <div class="webdesigntuts-workshop">
 	   <form  ng-submit="locationWeather(location)">
+
 	      <input type="text" ng-model="location" placeholder="Enter your location">
-	       <button type="submit">Search</button>
+        <button ng-click="nearme()" style="border-radius: 0px;width:30px"><img src="https://png.icons8.com/ios-glyphs/50/ffffff/place-marker.png" style="width:20px"></button>
+	      <button type="submit">Search</button>
      </form>
   </div>
+  <div class="spinner row" ng-show="loading"></div>
   <div class="weather-header row" style="">
     <div class="col-xs-0 col-sm-0 col-md-1 col-lg-1" >
     </div>
     <div class="col-xs-0 col-sm-0 col-md-1 col-lg-1" >
     </div>
     <div class="col-xs-6 col-sm-3 col-md-2 col-lg-2" >
-      Cloud:&nbsp;<span>{{clouds}}%</span>
+      <img src="https://png.icons8.com/ios-glyphs/50/000000/cloud.png">
+      &nbsp;Cloud:&nbsp;<span>{{clouds}}%</span>
     </div>
     <div class="col-xs-6 col-sm-3 col-md-2 col-lg-2" >
-      Pressure:&nbsp;<span>{{pressure}}&nbsp;hPa</span>
+      <img src="https://png.icons8.com/ios-glyphs/50/000000/pressure.png" style="height:14px">
+      &nbsp;Pressure:&nbsp;<span>{{pressure}}&nbsp;hPa</span>
     </div>
     <div class="col-xs-6 col-sm-3 col-md-2 col-lg-2" >
-      Wind:&nbsp;
+      <img src="https://png.icons8.com/ios-glyphs/50/000000/wind-gauge.png">
+      &nbsp;Wind:&nbsp;
       <span>
         {{windSpeed}}&nbsp;mph
-        <i class="fa fa-long-arrow-left" style="transform:rotate({{windDirection}}deg);font-weight:lighter"></i>
+        <i class="fa fa-long-arrow-up" style="transform:rotate({{windDirection}}deg);font-weight:lighter"></i>
       </span>
     </div>
     <div class="col-xs-6 col-sm-3 col-md-2 col-lg-2" >
-      Humidity:&nbsp;<span>{{humidity}}%</span>
+      <img src="https://png.icons8.com/ios-glyphs/50/000000/hygrometer.png">
+      &nbsp;Humidity:&nbsp;<span>{{humidity}}%</span>
     </div>
     <div class="col-xs-0 col-sm-0 col-md-1 col-lg-1" >
     </div>
@@ -301,7 +323,8 @@ var app = angular.module('my-app', []);
 var test=45;
 app.controller('weather-control', function($scope, $http) {
   $scope.location="Kolkata , WB";
-  $scope.unit="celsius"
+  $scope.unit="celsius";
+  $scope.loading=true;
   $http.get("https://api.openweathermap.org/data/2.5/weather?q=kolkata&APPID=a3f2d51baa09c809059539a1fb5656f9").then(function (response) {
     $scope.myData = response.data;
     $scope.pressure=response.data.main.pressure;
@@ -316,6 +339,8 @@ app.controller('weather-control', function($scope, $http) {
     $scope.description=$scope.myData.weather[0].description;
     $scope.imageUrl=$scope.myData.weather[0].icon;
     $scope.imageUrl="https://openweathermap.org/img/w/"+$scope.imageUrl+".png";
+  }).finally(function() {
+    $scope.loading = false;
   });
   $scope.convertToCelsius=function(){
     if($scope.unit!="celsius"){
@@ -333,8 +358,39 @@ app.controller('weather-control', function($scope, $http) {
       $scope.unit="fahrenheit";
     }
   }
+  $scope.nearme = function() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            $scope.$apply(function() {
+                $scope.lat = position.coords.latitude;
+                $scope.lan = position.coords.longitude;
+                $scope.unit="celsius";
+                $scope.loading=true;
+                $http.get("https://api.openweathermap.org/data/2.5/weather?lat="+$scope.lat+"&lon="+$scope.lan+"&appid=a3f2d51baa09c809059539a1fb5656f9").then(function (response) {
+                  $scope.myData = response.data;
+                  $scope.pressure=response.data.main.pressure;
+                  $scope.humidity=response.data.main.humidity;
+                  $scope.visibility=response.data.visibility;
+                  $scope.windSpeed=response.data.wind.speed;
+                  $scope.windDirection=response.data.wind.deg;
+                  $scope.temperature=$scope.myData.main.temp-273;
+                  $scope.minTemp=$scope.myData.main.temp_min-273;
+                  $scope.maxTemp=$scope.myData.main.temp_max-273;
+                  $scope.clouds=$scope.myData.clouds.all;
+                  $scope.description=$scope.myData.weather[0].description;
+                  $scope.location=$scope.myData.name+" , "+$scope.myData.sys.country;
+                  $scope.imageUrl=$scope.myData.weather[0].icon;
+                  $scope.imageUrl="https://openweathermap.org/img/w/"+$scope.imageUrl+".png";
+                }).finally(function() {
+                  $scope.loading = false;
+                });
+            })
+        });
+    }
+  }
   $scope.locationWeather=function(location){
     console.log(location);
+    $scope.loading=true;
     $http.get("https://api.openweathermap.org/data/2.5/weather?q="+$scope.location+"&APPID=a3f2d51baa09c809059539a1fb5656f9").then(function (response) {
       $scope.myData = response.data;
       $scope.pressure=response.data.main.pressure;
@@ -350,6 +406,8 @@ app.controller('weather-control', function($scope, $http) {
       $scope.location=$scope.myData.name+" , "+$scope.myData.sys.country;
       $scope.imageUrl=$scope.myData.weather[0].icon;
       $scope.imageUrl="https://openweathermap.org/img/w/"+$scope.imageUrl+".png";
+    }).finally(function() {
+      $scope.loading = false;
     });
 
   }
