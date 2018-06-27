@@ -234,10 +234,15 @@
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: center;
+  float:bottom;
   z-index: 10000;
 }
+#body{
+  display:none;
+}
 </style>
-<body>
+
+<body onload="displayBody()">
 
 <nav class="navbar navbar">
   <div class="container-fluid">
@@ -256,17 +261,17 @@
     </div>
   </div>
 </nav>
-<div ng-app="my-app" ng-controller="weather-control">
+<div ng-app="my-app" ng-controller="weather-control" >
   <div class="webdesigntuts-workshop">
 	   <form  ng-submit="locationWeather(location)">
-
 	      <input type="text" ng-model="location" placeholder="Enter your location">
+	      <button type="submit"style="border-radius: 0px;">Search</button>
         <button ng-click="nearme()" style="border-radius: 0px;width:30px"><img src="https://png.icons8.com/ios-glyphs/50/ffffff/place-marker.png" style="width:20px"></button>
-	      <button type="submit">Search</button>
      </form>
   </div>
   <div class="spinner row" ng-show="loading"></div>
-  <div class="weather-header row" style="">
+  <div ng-show="showDetails" id="body">
+  <div class="weather-header row">
     <div class="col-xs-0 col-sm-0 col-md-1 col-lg-1" >
     </div>
     <div class="col-xs-0 col-sm-0 col-md-1 col-lg-1" >
@@ -317,13 +322,20 @@
     </span>
   </div>
 </div>
+</div>
 
+<script>
+function displayBody(){
+  document.getElementById("body").style.display="block";
+}
+</script>
 <script>
 var app = angular.module('my-app', []);
 var test=45;
 app.controller('weather-control', function($scope, $http) {
   $scope.location="Kolkata , WB";
   $scope.unit="celsius";
+  $scope.showDetails=false;
   $scope.loading=true;
   $http.get("https://api.openweathermap.org/data/2.5/weather?q=kolkata&APPID=a3f2d51baa09c809059539a1fb5656f9").then(function (response) {
     $scope.myData = response.data;
@@ -341,6 +353,7 @@ app.controller('weather-control', function($scope, $http) {
     $scope.imageUrl="https://openweathermap.org/img/w/"+$scope.imageUrl+".png";
   }).finally(function() {
     $scope.loading = false;
+    $scope.showDetails=true;
   });
   $scope.convertToCelsius=function(){
     if($scope.unit!="celsius"){
@@ -358,6 +371,7 @@ app.controller('weather-control', function($scope, $http) {
       $scope.unit="fahrenheit";
     }
   }
+  //$scope.nearme = function();
   $scope.nearme = function() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
@@ -366,6 +380,7 @@ app.controller('weather-control', function($scope, $http) {
                 $scope.lan = position.coords.longitude;
                 $scope.unit="celsius";
                 $scope.loading=true;
+                $scope.showDetails=false;
                 $http.get("https://api.openweathermap.org/data/2.5/weather?lat="+$scope.lat+"&lon="+$scope.lan+"&appid=a3f2d51baa09c809059539a1fb5656f9").then(function (response) {
                   $scope.myData = response.data;
                   $scope.pressure=response.data.main.pressure;
@@ -383,6 +398,7 @@ app.controller('weather-control', function($scope, $http) {
                   $scope.imageUrl="https://openweathermap.org/img/w/"+$scope.imageUrl+".png";
                 }).finally(function() {
                   $scope.loading = false;
+                  $scope.showDetails=true;
                 });
             })
         });
@@ -391,6 +407,7 @@ app.controller('weather-control', function($scope, $http) {
   $scope.locationWeather=function(location){
     console.log(location);
     $scope.loading=true;
+    $scope.showDetails=false;
     $http.get("https://api.openweathermap.org/data/2.5/weather?q="+$scope.location+"&APPID=a3f2d51baa09c809059539a1fb5656f9").then(function (response) {
       $scope.myData = response.data;
       $scope.pressure=response.data.main.pressure;
@@ -408,6 +425,7 @@ app.controller('weather-control', function($scope, $http) {
       $scope.imageUrl="https://openweathermap.org/img/w/"+$scope.imageUrl+".png";
     }).finally(function() {
       $scope.loading = false;
+      $scope.showDetails=true;
     });
 
   }
